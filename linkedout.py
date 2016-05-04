@@ -12,6 +12,7 @@ from scrapy.settings import Settings
 from twisted.internet import reactor
 
 import re
+import argparse
 
 global links
 global words
@@ -24,10 +25,13 @@ hash_tags = []
 dates = []
 
 class zSpider(Spider):
-	name = "linkedout"
-	allowed_domains = ["linkedin.com"]
-	url = "<insert URL HERE>"
-	start_urls = [url]
+
+	def __init__(self):
+
+		self.name = "linkedout"
+		self.allowed_domains = ["linkedin.com"]
+		self.url = opt.url
+		self.start_urls = [self.url]
 
 	def parse(self, response):
 		#[u'Dallas, Texas']
@@ -230,14 +234,6 @@ class zSpider(Spider):
 					words.append(x.encode('ascii','ignore'))
 
 
-settings = Settings()
-settings.set('USER_AGENT', 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/49.0.2623.108 Safari/537.36')
-settings.set('BOT_NAME', 'Something new')
-
-crawler = CrawlerProcess(settings)
-
-crawler.crawl(zSpider)
-crawler.start()
 
 #get uniq out of the string list
 def uniq(tmp_listobj):
@@ -261,25 +257,45 @@ def uniq(tmp_listobj):
 		temp = item  
     return small, final
 
-link_small, clean_links = uniq(links)
-words_small, clean_words = uniq(words)
-hash_tags_small, clean_hash_tags = uniq(hash_tags)
-dates_small, clean_dates = uniq(dates)
 
-small = []
-for x in link_small:
-	small.append(x)
-for x in words_small:
-	small.append(x)
-for x in hash_tags_small:
-	small.append(x)
-for x in dates_small:
-	small.append(x)
+if __name__ == '__main__':
 
-clean_small, tmp = uniq(small)
+	print("Linkedout Linkedin profile scrapper\n")
+	print("Standalone program to get keywords by scraping linkedin profiles\n\n")
 
-print("\nlinks: %s\n\n" % clean_links)
-print("\nwords: %s\n\n" % clean_words)
-print("\nhash_tags: %s\n\n" % clean_hash_tags)
-print("\ndates: %s\n\n" % clean_dates)
-print("\nsmall: %s\n\n" % clean_small)
+	parser = argparse.ArgumentParser(description="linkedout",epilog=None)
+	parser.add_argument("-u","--url",help="Linkedin URL path.",type=str,required=True)
+
+	opt = parser.parse_args()
+
+	settings = Settings()
+	settings.set('USER_AGENT', 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/49.0.2623.108 Safari/537.36')
+	settings.set('BOT_NAME', 'Something new')
+
+	crawler = CrawlerProcess(settings)
+
+	crawler.crawl(zSpider)
+	crawler.start()
+
+	link_small, clean_links = uniq(links)
+	words_small, clean_words = uniq(words)
+	hash_tags_small, clean_hash_tags = uniq(hash_tags)
+	dates_small, clean_dates = uniq(dates)
+
+	small = []
+	for x in link_small:
+		small.append(x)
+	for x in words_small:
+		small.append(x)
+	for x in hash_tags_small:
+		small.append(x)
+	for x in dates_small:
+		small.append(x)
+
+	clean_small, tmp = uniq(small)
+
+	print("\nlinks: %s\n\n" % clean_links)
+	print("\nwords: %s\n\n" % clean_words)
+	print("\nhash_tags: %s\n\n" % clean_hash_tags)
+	print("\ndates: %s\n\n" % clean_dates)
+	print("\nsmall: %s\n\n" % clean_small)
